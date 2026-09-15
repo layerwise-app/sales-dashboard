@@ -1,6 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { cn } from '~/lib/utils';
-import { seo } from '~/utils/seo';
+import { useState } from 'react';
 import {
   ArrowDownRight,
   ArrowRight,
@@ -11,39 +10,42 @@ import {
   ChevronDown,
   ChevronRight,
   CircleDollarSign,
-  FileText,
   LayoutDashboard,
+  PanelLeftClose,
+  PanelLeftOpen,
   Search,
   Settings,
   Sparkles,
   Target,
-  TrendingUp,
   UserPlus,
   Users,
   Wallet
 } from 'lucide-react';
-import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from 'recharts';
 import { Avatar, AvatarFallback } from '~/components/ui/avatar';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarInset,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarRail,
-  SidebarTrigger
-} from '~/components/ui/sidebar';
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '~/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table';
+import { cn } from '~/lib/utils';
+import { seo } from '~/utils/seo';
 
 const homePageTitle = 'Sales Operations Dashboard';
 
@@ -59,13 +61,24 @@ export const Route = createFileRoute('/')({
   component: Home
 });
 
-const navigation = [
-  { label: 'Overview', icon: LayoutDashboard },
-  { label: 'Leads', icon: UserPlus },
-  { label: 'Deals', icon: Wallet },
-  { label: 'Customers', icon: Users },
-  { label: 'Reports', icon: BarChart3 },
-  { label: 'Settings', icon: Settings }
+const navSections = [
+  {
+    label: 'Overview',
+    items: [{ label: 'Dashboard', icon: LayoutDashboard, active: true }]
+  },
+  {
+    label: 'Sales',
+    items: [
+      { label: 'Leads', icon: UserPlus, active: false },
+      { label: 'Deals', icon: Wallet, active: false },
+      { label: 'Customers', icon: Users, active: false },
+      { label: 'Reports', icon: BarChart3, active: false }
+    ]
+  },
+  {
+    label: 'Manage',
+    items: [{ label: 'Settings', icon: Settings, active: false }]
+  }
 ];
 
 const metrics = [
@@ -93,7 +106,7 @@ const metrics = [
     change: '-5',
     direction: 'down',
     caption: 'vs. last month',
-    icon: Target,
+    icon: Wallet,
     color: '#fbbf24'
   },
   {
@@ -136,120 +149,250 @@ const recentDeals = [
 ];
 
 const topPerformers = [
-  { rank: 1, initials: 'SC', name: 'Sarah Chen', deals: '24 deals closed', revenue: '$487,500', change: '+15%', color: '#34d399' },
-  { rank: 2, initials: 'MJ', name: 'Mike Johnson', deals: '19 deals closed', revenue: '$356,200', change: '+11%', color: '#60a5fa' },
-  { rank: 3, initials: 'ED', name: 'Emily Davis', deals: '17 deals closed', revenue: '$312,800', change: '+12%', color: '#fbbf24' }
+  { rank: 1, initials: 'SC', name: 'Sarah Chen', deals: '24 deals closed', revenue: '$487,500', change: '+15%' },
+  { rank: 2, initials: 'MJ', name: 'Mike Johnson', deals: '19 deals closed', revenue: '$356,200', change: '+11%' },
+  { rank: 3, initials: 'ED', name: 'Emily Davis', deals: '17 deals closed', revenue: '$312,800', change: '+12%' }
 ];
 
-const longNav = navigation.slice(1);
+function BrandMark({ compact = false }: { compact?: boolean }) {
+  return (
+    <div className='flex items-center gap-3'>
+      <div className='flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-400 font-bold text-emerald-950 shadow-[0_0_28px_rgba(52,211,153,0.28)]'>
+        V
+      </div>
+      {!compact && (
+        <div className='min-w-0'>
+          <p className='truncate text-sm font-semibold text-zinc-50'>SalesOps</p>
+          <p className='truncate text-xs text-zinc-500'>Revenue hub</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SidebarItem({
+  label,
+  icon: Icon,
+  active = false,
+  collapsed
+}: {
+  label: string;
+  icon: typeof LayoutDashboard;
+  active?: boolean;
+  collapsed: boolean;
+}) {
+  return (
+    <button
+      type='button'
+      className={cn(
+        'group flex h-10 w-full items-center gap-3 rounded-lg px-3 text-sm transition-colors',
+        active
+          ? 'bg-zinc-100 font-medium text-zinc-950'
+          : 'text-zinc-400 hover:bg-zinc-800/70 hover:text-zinc-100',
+        collapsed && 'justify-center px-2'
+      )}
+      title={label}
+    >
+      <Icon className='size-4 shrink-0' />
+      {!collapsed && <span className='truncate'>{label}</span>}
+    </button>
+  );
+}
+
+function Sidebar({ collapsed }: { collapsed: boolean }) {
+  return (
+    <aside
+      className={cn(
+        'sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-zinc-800/80 bg-zinc-950 transition-[width] duration-200 md:flex',
+        collapsed ? 'w-[72px]' : 'w-64'
+      )}
+    >
+      <div className='flex h-16 shrink-0 items-center px-4'>
+        <BrandMark compact={collapsed} />
+      </div>
+
+      <div className='flex-1 space-y-6 overflow-y-auto px-3 pb-4'>
+        {navSections.map((section) => (
+          <div key={section.label}>
+            {!collapsed && <p className='mb-2 px-3 text-xs font-medium text-zinc-600'>{section.label}</p>}
+            <div className='space-y-1'>
+              {section.items.map((item) => (
+                <SidebarItem
+                  key={item.label}
+                  label={item.label}
+                  icon={item.icon}
+                  active={item.active}
+                  collapsed={collapsed}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className='border-t border-zinc-800/80 p-3'>
+        {!collapsed ? (
+          <div className='rounded-xl border border-zinc-800/80 bg-zinc-900/70 p-3'>
+            <div className='mb-2 flex items-center justify-between'>
+              <Sparkles className='size-4 text-emerald-400' />
+              <p className='text-xs font-medium text-zinc-100'>Growth plan</p>
+              <ChevronDown className='size-3.5 text-zinc-600' />
+            </div>
+            <p className='text-xs leading-4 text-zinc-500'>Turn pipeline activity into next quarter's revenue forecast.</p>
+            <button
+              type='button'
+              className='mt-3 flex w-full items-center justify-between rounded-lg bg-zinc-100 px-3 py-2 text-left text-xs font-medium text-zinc-950 transition hover:bg-white'
+            >
+              View plan <ChevronRight className='size-3.5' />
+            </button>
+          </div>
+        ) : (
+          <button
+            type='button'
+            className='flex h-10 w-full items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 transition hover:text-zinc-100'
+            title='Growth plan'
+          >
+            <Sparkles className='size-4 text-emerald-400' />
+          </button>
+        )}
+      </div>
+    </aside>
+  );
+}
+
+function MobileSidebar({
+  open,
+  onClose
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
+  if (!open) {
+    return null;
+  }
+
+  return (
+    <div className='fixed inset-0 z-50 md:hidden'>
+      <button
+        type='button'
+        className='absolute inset-0 bg-black/60'
+        onClick={onClose}
+        aria-label='Close navigation'
+      />
+      <aside className='absolute inset-y-0 left-0 flex w-72 flex-col border-r border-zinc-800 bg-zinc-950 shadow-2xl'>
+        <div className='flex h-16 shrink-0 items-center justify-between px-4'>
+          <BrandMark />
+          <button
+            type='button'
+            onClick={onClose}
+            className='flex h-9 w-9 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-800 hover:text-zinc-100'
+            aria-label='Close navigation'
+          >
+            <PanelLeftClose className='size-4' />
+          </button>
+        </div>
+        <div className='flex-1 space-y-6 overflow-y-auto px-3 pb-4'>
+          {navSections.map((section) => (
+            <div key={section.label}>
+              <p className='mb-2 px-3 text-xs font-medium text-zinc-600'>{section.label}</p>
+              <div className='space-y-1'>
+                {section.items.map((item) => (
+                  <SidebarItem
+                    key={item.label}
+                    label={item.label}
+                    icon={item.icon}
+                    active={item.active}
+                    collapsed={false}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className='border-t border-zinc-800/80 p-3'>
+          <div className='rounded-xl border border-zinc-800/80 bg-zinc-900/70 p-3'>
+            <div className='mb-2 flex items-center justify-between'>
+              <Sparkles className='size-4 text-emerald-400' />
+              <p className='text-xs font-medium text-zinc-100'>Growth plan</p>
+              <ChevronDown className='size-3.5 text-zinc-600' />
+            </div>
+            <p className='text-xs leading-4 text-zinc-500'>Turn pipeline activity into next quarter's revenue forecast.</p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  );
+}
 
 function Home() {
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   return (
-    <SidebarProvider defaultOpen>
-      <div className='dark min-h-screen bg-zinc-950 text-zinc-100'>
-        <Sidebar collapsible='icon'>
-          <SidebarHeader className='p-4'>
-            <div className='flex h-9 items-center gap-3 px-2'>
-              <div className='flex size-8 items-center justify-center rounded-lg bg-emerald-400 font-bold text-emerald-950'>
-                V
+    <div className='dark min-h-screen bg-zinc-950 text-zinc-100'>
+      <div className='flex min-h-screen'>
+        <Sidebar collapsed={collapsed} />
+        <MobileSidebar open={mobileOpen} onClose={() => setMobileOpen(false)} />
+
+        <div className='min-w-0 flex-1'>
+          <header className='sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between border-b border-zinc-800/80 bg-zinc-950/90 px-4 backdrop-blur lg:px-8'>
+            <div className='flex items-center gap-3'>
+              <button
+                type='button'
+                onClick={() => setMobileOpen(true)}
+                className='flex h-9 w-9 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-800 hover:text-zinc-100 md:hidden'
+                aria-label='Open navigation'
+              >
+                <PanelLeftOpen className='size-4' />
+              </button>
+              <button
+                type='button'
+                onClick={() => setCollapsed((value) => !value)}
+                className='hidden h-9 w-9 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-800 hover:text-zinc-100 md:flex'
+                aria-label='Toggle sidebar'
+              >
+                {collapsed ? <PanelLeftOpen className='size-4' /> : <PanelLeftClose className='size-4' />}
+              </button>
+              <div className='flex items-center gap-2 md:hidden'>
+                <BrandMark compact />
               </div>
-              <div className='flex-1'>
-                <p className='text-sm font-semibold text-zinc-50'>SalesOps</p>
-                <p className='text-xs text-zinc-500'>Revenue hub</p>
-              </div>
+              <span className='hidden text-sm font-medium text-zinc-400 sm:inline'>Overview</span>
             </div>
-          </SidebarHeader>
-
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupLabel>Menu</SidebarGroupLabel>
-              <SidebarMenu>
-                {navigation.map((item, index) => (
-                  <SidebarMenuItem key={item.label}>
-                    <SidebarMenuButton
-                      isActive={index === 0}
-                      tooltip={item.label}
-                      className={cn(
-                        index === 0
-                          ? 'bg-zinc-800 text-white hover:bg-zinc-800 hover:text-white'
-                          : 'text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-100'
-                      )}
-                    >
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroup>
-
-            <SidebarGroup>
-              <SidebarGroupLabel>Workspace</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {longNav.map((item) => (
-                  <SidebarMenuItem key={item.label}>
-                    <SidebarMenuButton
-                      tooltip={item.label}
-                      className='text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-100'
-                    >
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-
-          <SidebarFooter className='p-4'>
-            <div className='rounded-xl border border-zinc-800 bg-zinc-900 p-3'>
-              <div className='mb-2 flex items-center justify-between'>
-                <Sparkles className='size-4 text-emerald-400' />
-                <p className='text-xs font-medium text-zinc-100'>Growth plan</p>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                className='hidden h-9 w-9 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400 transition hover:text-zinc-100 md:flex'
+                aria-label='Search'
+              >
+                <Search className='size-4' />
+              </button>
+              <button
+                type='button'
+                className='relative hidden h-9 w-9 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400 transition hover:text-zinc-100 md:flex'
+                aria-label='Notifications'
+              >
+                <Bell className='size-4' />
+                <span className='absolute top-1.5 right-1.5 size-1.5 rounded-full bg-emerald-400' />
+              </button>
+              <button
+                type='button'
+                className='flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900 py-1.5 pr-3 pl-1.5 transition hover:border-zinc-700'
+              >
+                <Avatar className='size-7'>
+                  <AvatarFallback className='bg-emerald-400 text-xs text-emerald-950'>JD</AvatarFallback>
+                </Avatar>
+                <span className='hidden text-sm font-medium text-zinc-200 sm:inline'>Jordan Davis</span>
                 <ChevronDown className='size-3.5 text-zinc-500' />
-              </div>
-              <p className='text-xs leading-4 text-zinc-500'>
-                Turn pipeline activity into next quarter's revenue forecast.
-              </p>
-              <button className='mt-3 flex w-full items-center justify-between rounded-lg bg-zinc-100 px-3 py-2 text-left text-xs font-medium text-zinc-950 transition hover:bg-white'>
-                View plan <ChevronRight className='size-3.5' />
               </button>
             </div>
-          </SidebarFooter>
-        </Sidebar>
+          </header>
 
-        <SidebarInset className='bg-zinc-950'>
-          <div className='flex min-h-screen flex-col bg-zinc-950'>
-            <header className='flex h-16 shrink-0 items-center justify-between border-b border-zinc-800/80 px-4 lg:px-8'>
-              <div className='flex items-center gap-2'>
-                <SidebarTrigger className='text-zinc-400' />
-                <span className='text-sm font-medium text-zinc-400'>Overview</span>
-              </div>
-              <div className='flex items-center gap-2'>
-                <button className='hidden h-9 w-9 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400 transition hover:text-zinc-100 md:flex'>
-                  <Search className='size-4' />
-                </button>
-                <button className='hidden h-9 w-9 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400 transition hover:text-zinc-100 md:flex'>
-                  <Bell className='size-4' />
-                  <span className='absolute top-1.5 right-1.5 size-1.5 rounded-full bg-emerald-400' />
-                </button>
-                <button className='flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900 py-1.5 pr-3 pl-1.5 transition hover:border-zinc-700'>
-                  <Avatar className='size-7'>
-                    <AvatarFallback className='bg-emerald-400 text-xs text-emerald-950'>JD</AvatarFallback>
-                  </Avatar>
-                  <span className='hidden text-sm font-medium text-zinc-200 sm:inline'>Jordan Davis</span>
-                  <ChevronDown className='size-3.5 text-zinc-500' />
-                </button>
-              </div>
-            </header>
-
-            <main className='flex-1 space-y-6 px-4 py-6 lg:px-8'>
+          <main className='bg-[radial-gradient(circle_at_top_right,rgba(52,211,153,0.08),transparent_42%)]'>
+            <div className='space-y-6 px-4 py-6 lg:px-8'>
               <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
                 <div>
                   <div className='flex items-center gap-2 text-sm text-zinc-500'>
-                    <span className='font-medium text-zinc-500'>Overview</span>
+                    <span className='font-medium text-zinc-400'>Overview</span>
                     <span>/</span>
                     <span>Sales performance</span>
                   </div>
@@ -278,7 +421,12 @@ function Home() {
                           <p className='text-sm text-zinc-400'>{metric.label}</p>
                           <p className='mt-2 text-2xl font-semibold tracking-tight text-zinc-50'>{metric.value}</p>
                           <div className='mt-2 flex items-center gap-2 text-xs text-zinc-500'>
-                            <span className={cn('inline-flex items-center gap-1 font-medium', metric.direction === 'up' ? 'text-emerald-400' : 'text-amber-400')}>
+                            <span
+                              className={cn(
+                                'inline-flex items-center gap-1 font-medium',
+                                metric.direction === 'up' ? 'text-emerald-400' : 'text-amber-400'
+                              )}
+                            >
                               {metric.direction === 'up' ? <ArrowUpRight className='size-3.5' /> : <ArrowDownRight className='size-3.5' />}
                               {metric.change}
                             </span>
@@ -303,10 +451,12 @@ function Home() {
                     </div>
                     <div className='flex items-center gap-4 text-xs text-zinc-500'>
                       <span className='flex items-center gap-1.5'>
-                        <span className='size-2 rounded-full bg-zinc-400' /> Revenue
+                        <span className='size-2 rounded-full bg-zinc-400' />
+                        Revenue
                       </span>
                       <span className='flex items-center gap-1.5'>
-                        <span className='size-2 rounded-full bg-emerald-400' /> Target
+                        <span className='size-2 rounded-full bg-emerald-400' />
+                        Target
                       </span>
                     </div>
                   </CardHeader>
@@ -321,8 +471,19 @@ function Home() {
                             </linearGradient>
                           </defs>
                           <CartesianGrid vertical={false} stroke='#27272a' strokeDasharray='4 4' />
-                          <XAxis dataKey='month' tickLine={false} axisLine={false} tickMargin={12} tick={{ fill: '#71717a', fontSize: 12 }} />
-                          <YAxis tickLine={false} axisLine={false} tick={{ fill: '#71717a', fontSize: 12 }} tickFormatter={(value) => `$${value}M`} />
+                          <XAxis
+                            dataKey='month'
+                            tickLine={false}
+                            axisLine={false}
+                            tickMargin={12}
+                            tick={{ fill: '#71717a', fontSize: 12 }}
+                          />
+                          <YAxis
+                            tickLine={false}
+                            axisLine={false}
+                            tick={{ fill: '#71717a', fontSize: 12 }}
+                            tickFormatter={(value) => `$${value}M`}
+                          />
                           <Tooltip
                             cursor={{ stroke: '#3f3f46' }}
                             wrapperStyle={{ outline: 'none' }}
@@ -342,10 +503,20 @@ function Home() {
                     <CardDescription className='text-zinc-500'>Distribution by stage</CardDescription>
                   </CardHeader>
                   <CardContent className='px-5 pt-5'>
-                    <div className='relative mx-auto h-44 w-44'>
+                      <div className='relative mx-auto h-44 w-44'>
                       <ResponsiveContainer width='100%' height='100%'>
                         <PieChart>
-                          <Pie data={pipelineData} dataKey='count' nameKey='name' cx='50%' cy='50%' innerRadius={58} outerRadius={76} paddingAngle={3} stroke='none'>
+                          <Pie
+                            data={pipelineData}
+                            dataKey='count'
+                            nameKey='name'
+                            cx='50%'
+                            cy='50%'
+                            innerRadius={58}
+                            outerRadius={76}
+                            paddingAngle={3}
+                            stroke='none'
+                          >
                             {pipelineData.map((entry) => (
                               <Cell key={entry.name} fill={entry.color} />
                             ))}
@@ -460,10 +631,10 @@ function Home() {
                   </CardContent>
                 </Card>
               </div>
-            </main>
-          </div>
-        </SidebarInset>
+            </div>
+          </main>
+        </div>
       </div>
-    </SidebarProvider>
+    </div>
   );
 }
