@@ -1,24 +1,12 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import {
   ArrowDownRight,
   ArrowRight,
   ArrowUpRight,
-  BarChart3,
-  Bell,
   CalendarDays,
-  ChevronDown,
-  ChevronRight,
   CircleDollarSign,
-  LayoutDashboard,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Search,
-  Settings,
-  Sparkles,
   Target,
   UserPlus,
-  Users,
   Wallet
 } from 'lucide-react';
 import {
@@ -44,6 +32,7 @@ import {
   CardTitle
 } from '~/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table';
+import { SalesShell } from '~/components/sales-shell';
 import { cn } from '~/lib/utils';
 import { seo } from '~/utils/seo';
 
@@ -60,26 +49,6 @@ export const Route = createFileRoute('/')({
   }),
   component: Home
 });
-
-const navSections = [
-  {
-    label: 'Overview',
-    items: [{ label: 'Dashboard', icon: LayoutDashboard, active: true }]
-  },
-  {
-    label: 'Sales',
-    items: [
-      { label: 'Leads', icon: UserPlus, active: false },
-      { label: 'Deals', icon: Wallet, active: false },
-      { label: 'Customers', icon: Users, active: false },
-      { label: 'Reports', icon: BarChart3, active: false }
-    ]
-  },
-  {
-    label: 'Manage',
-    items: [{ label: 'Settings', icon: Settings, active: false }]
-  }
-];
 
 const metrics = [
   {
@@ -154,487 +123,240 @@ const topPerformers = [
   { rank: 3, initials: 'ED', name: 'Emily Davis', deals: '17 deals closed', revenue: '$312,800', change: '+12%' }
 ];
 
-function BrandMark({ compact = false }: { compact?: boolean }) {
+function Home() {
   return (
-    <div className='flex items-center gap-3'>
-      <div className='flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-400 font-bold text-emerald-950 shadow-[0_0_28px_rgba(52,211,153,0.28)]'>
-        V
-      </div>
-      {!compact && (
-        <div className='min-w-0'>
-          <p className='truncate text-sm font-semibold text-zinc-50'>SalesOps</p>
-          <p className='truncate text-xs text-zinc-500'>Revenue hub</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function SidebarItem({
-  label,
-  icon: Icon,
-  active = false,
-  collapsed
-}: {
-  label: string;
-  icon: typeof LayoutDashboard;
-  active?: boolean;
-  collapsed: boolean;
-}) {
-  return (
-    <button
-      type='button'
-      className={cn(
-        'group flex h-10 w-full items-center gap-3 rounded-lg px-3 text-sm transition-colors',
-        active
-          ? 'bg-zinc-100 font-medium text-zinc-950'
-          : 'text-zinc-400 hover:bg-zinc-800/70 hover:text-zinc-100',
-        collapsed && 'justify-center px-2'
-      )}
-      title={label}
-    >
-      <Icon className='size-4 shrink-0' />
-      {!collapsed && <span className='truncate'>{label}</span>}
-    </button>
-  );
-}
-
-function Sidebar({ collapsed }: { collapsed: boolean }) {
-  return (
-    <aside
-      className={cn(
-        'sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-zinc-800/80 bg-zinc-950 transition-[width] duration-200 md:flex',
-        collapsed ? 'w-[72px]' : 'w-64'
-      )}
-    >
-      <div className='flex h-16 shrink-0 items-center px-4'>
-        <BrandMark compact={collapsed} />
-      </div>
-
-      <div className='flex-1 space-y-6 overflow-y-auto px-3 pb-4'>
-        {navSections.map((section) => (
-          <div key={section.label}>
-            {!collapsed && <p className='mb-2 px-3 text-xs font-medium text-zinc-600'>{section.label}</p>}
-            <div className='space-y-1'>
-              {section.items.map((item) => (
-                <SidebarItem
-                  key={item.label}
-                  label={item.label}
-                  icon={item.icon}
-                  active={item.active}
-                  collapsed={collapsed}
-                />
-              ))}
-            </div>
+    <SalesShell currentPath='/'>
+      <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
+        <div>
+          <div className='flex items-center gap-2 text-sm text-zinc-500'>
+            <span className='font-medium text-zinc-400'>Overview</span>
+            <span>/</span>
+            <span>Sales performance</span>
           </div>
+          <h1 className='mt-2 text-2xl font-semibold tracking-tight text-zinc-50 sm:text-3xl'>
+            Sales Operations Dashboard
+          </h1>
+          <p className='mt-1 text-sm text-zinc-500'>Manage your pipeline and team performance.</p>
+        </div>
+        <div className='flex items-center gap-2'>
+          <div className='flex h-9 items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-3 text-sm text-zinc-300'>
+            <CalendarDays className='size-4 text-zinc-500' />
+            Last 30 days
+          </div>
+          <Button className='bg-zinc-100 text-zinc-950 hover:bg-white'>
+            Export <ArrowRight className='size-4' />
+          </Button>
+        </div>
+      </div>
+
+      <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-4'>
+        {metrics.map((metric) => (
+          <Card key={metric.label} className='gap-0 border-zinc-800/80 bg-zinc-900/70 py-5 ring-0'>
+            <CardContent className='px-5'>
+              <div className='flex items-start justify-between gap-4'>
+                <div>
+                  <p className='text-sm text-zinc-400'>{metric.label}</p>
+                  <p className='mt-2 text-2xl font-semibold tracking-tight text-zinc-50'>{metric.value}</p>
+                  <div className='mt-2 flex items-center gap-2 text-xs text-zinc-500'>
+                    <span
+                      className={cn(
+                        'inline-flex items-center gap-1 font-medium',
+                        metric.direction === 'up' ? 'text-emerald-400' : 'text-amber-400'
+                      )}
+                    >
+                      {metric.direction === 'up' ? <ArrowUpRight className='size-3.5' /> : <ArrowDownRight className='size-3.5' />}
+                      {metric.change}
+                    </span>
+                    <span>{metric.caption}</span>
+                  </div>
+                </div>
+                <div className='flex size-10 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-950/70'>
+                  <metric.icon className='size-4' style={{ color: metric.color }} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
-      <div className='border-t border-zinc-800/80 p-3'>
-        {!collapsed ? (
-          <div className='rounded-xl border border-zinc-800/80 bg-zinc-900/70 p-3'>
-            <div className='mb-2 flex items-center justify-between'>
-              <Sparkles className='size-4 text-emerald-400' />
-              <p className='text-xs font-medium text-zinc-100'>Growth plan</p>
-              <ChevronDown className='size-3.5 text-zinc-600' />
+      <div className='grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.75fr)]'>
+        <Card className='gap-0 border-zinc-800/80 bg-zinc-900/70 py-0 ring-0'>
+          <CardHeader className='gap-2 border-b border-zinc-800/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between'>
+            <div>
+              <CardTitle className='text-base font-medium text-zinc-50'>Revenue Trend</CardTitle>
+              <CardDescription className='text-zinc-500'>Monthly performance vs target</CardDescription>
             </div>
-            <p className='text-xs leading-4 text-zinc-500'>Turn pipeline activity into next quarter's revenue forecast.</p>
-            <button
-              type='button'
-              className='mt-3 flex w-full items-center justify-between rounded-lg bg-zinc-100 px-3 py-2 text-left text-xs font-medium text-zinc-950 transition hover:bg-white'
-            >
-              View plan <ChevronRight className='size-3.5' />
-            </button>
-          </div>
-        ) : (
-          <button
-            type='button'
-            className='flex h-10 w-full items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 transition hover:text-zinc-100'
-            title='Growth plan'
-          >
-            <Sparkles className='size-4 text-emerald-400' />
-          </button>
-        )}
-      </div>
-    </aside>
-  );
-}
-
-function MobileSidebar({
-  open,
-  onClose
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
-  if (!open) {
-    return null;
-  }
-
-  return (
-    <div className='fixed inset-0 z-50 md:hidden'>
-      <button
-        type='button'
-        className='absolute inset-0 bg-black/60'
-        onClick={onClose}
-        aria-label='Close navigation'
-      />
-      <aside className='absolute inset-y-0 left-0 flex w-72 flex-col border-r border-zinc-800 bg-zinc-950 shadow-2xl'>
-        <div className='flex h-16 shrink-0 items-center justify-between px-4'>
-          <BrandMark />
-          <button
-            type='button'
-            onClick={onClose}
-            className='flex h-9 w-9 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-800 hover:text-zinc-100'
-            aria-label='Close navigation'
-          >
-            <PanelLeftClose className='size-4' />
-          </button>
-        </div>
-        <div className='flex-1 space-y-6 overflow-y-auto px-3 pb-4'>
-          {navSections.map((section) => (
-            <div key={section.label}>
-              <p className='mb-2 px-3 text-xs font-medium text-zinc-600'>{section.label}</p>
-              <div className='space-y-1'>
-                {section.items.map((item) => (
-                  <SidebarItem
-                    key={item.label}
-                    label={item.label}
-                    icon={item.icon}
-                    active={item.active}
-                    collapsed={false}
+            <div className='flex items-center gap-4 text-xs text-zinc-500'>
+              <span className='flex items-center gap-1.5'>
+                <span className='size-2 rounded-full bg-zinc-400' />
+                Revenue
+              </span>
+              <span className='flex items-center gap-1.5'>
+                <span className='size-2 rounded-full bg-emerald-400' />
+                Target
+              </span>
+            </div>
+          </CardHeader>
+          <CardContent className='px-3 pt-4 sm:px-4'>
+            <div className='h-[300px] w-full'>
+              <ResponsiveContainer width='100%' height='100%'>
+                <AreaChart data={revenueData} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id='revenue' x1='0' y1='0' x2='0' y2='1'>
+                      <stop offset='5%' stopColor='#34d399' stopOpacity={0.55} />
+                      <stop offset='95%' stopColor='#34d399' stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid vertical={false} stroke='#27272a' strokeDasharray='4 4' />
+                  <XAxis dataKey='month' tickLine={false} axisLine={false} tickMargin={12} tick={{ fill: '#71717a', fontSize: 12 }} />
+                  <YAxis tickLine={false} axisLine={false} tick={{ fill: '#71717a', fontSize: 12 }} tickFormatter={(value) => `$${value}M`} />
+                  <Tooltip
+                    cursor={{ stroke: '#3f3f46' }}
+                    wrapperStyle={{ outline: 'none' }}
+                    contentStyle={{ borderRadius: 12, border: '1px solid #3f3f46', background: '#18181b', color: '#e4e4e7' }}
                   />
-                ))}
-              </div>
+                  <Area type='monotone' dataKey='revenue' stroke='#e4e4e7' strokeWidth={2} fill='url(#revenue)' />
+                  <Area type='monotone' dataKey='target' stroke='#34d399' strokeWidth={2} fill='transparent' strokeDasharray='5 5' />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
-          ))}
-        </div>
-        <div className='border-t border-zinc-800/80 p-3'>
-          <div className='rounded-xl border border-zinc-800/80 bg-zinc-900/70 p-3'>
-            <div className='mb-2 flex items-center justify-between'>
-              <Sparkles className='size-4 text-emerald-400' />
-              <p className='text-xs font-medium text-zinc-100'>Growth plan</p>
-              <ChevronDown className='size-3.5 text-zinc-600' />
-            </div>
-            <p className='text-xs leading-4 text-zinc-500'>Turn pipeline activity into next quarter's revenue forecast.</p>
-          </div>
-        </div>
-      </aside>
-    </div>
-  );
-}
+          </CardContent>
+        </Card>
 
-function Home() {
-  const [collapsed, setCollapsed] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  return (
-    <div className='dark min-h-screen bg-zinc-950 text-zinc-100'>
-      <div className='flex min-h-screen'>
-        <Sidebar collapsed={collapsed} />
-        <MobileSidebar open={mobileOpen} onClose={() => setMobileOpen(false)} />
-
-        <div className='min-w-0 flex-1'>
-          <header className='sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between border-b border-zinc-800/80 bg-zinc-950/90 px-4 backdrop-blur lg:px-8'>
-            <div className='flex items-center gap-3'>
-              <button
-                type='button'
-                onClick={() => setMobileOpen(true)}
-                className='flex h-9 w-9 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-800 hover:text-zinc-100 md:hidden'
-                aria-label='Open navigation'
-              >
-                <PanelLeftOpen className='size-4' />
-              </button>
-              <button
-                type='button'
-                onClick={() => setCollapsed((value) => !value)}
-                className='hidden h-9 w-9 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-800 hover:text-zinc-100 md:flex'
-                aria-label='Toggle sidebar'
-              >
-                {collapsed ? <PanelLeftOpen className='size-4' /> : <PanelLeftClose className='size-4' />}
-              </button>
-              <div className='flex items-center gap-2 md:hidden'>
-                <BrandMark compact />
-              </div>
-              <span className='hidden text-sm font-medium text-zinc-400 sm:inline'>Overview</span>
-            </div>
-            <div className='flex items-center gap-2'>
-              <button
-                type='button'
-                className='hidden h-9 w-9 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400 transition hover:text-zinc-100 md:flex'
-                aria-label='Search'
-              >
-                <Search className='size-4' />
-              </button>
-              <button
-                type='button'
-                className='relative hidden h-9 w-9 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400 transition hover:text-zinc-100 md:flex'
-                aria-label='Notifications'
-              >
-                <Bell className='size-4' />
-                <span className='absolute top-1.5 right-1.5 size-1.5 rounded-full bg-emerald-400' />
-              </button>
-              <button
-                type='button'
-                className='flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900 py-1.5 pr-3 pl-1.5 transition hover:border-zinc-700'
-              >
-                <Avatar className='size-7'>
-                  <AvatarFallback className='bg-emerald-400 text-xs text-emerald-950'>JD</AvatarFallback>
-                </Avatar>
-                <span className='hidden text-sm font-medium text-zinc-200 sm:inline'>Jordan Davis</span>
-                <ChevronDown className='size-3.5 text-zinc-500' />
-              </button>
-            </div>
-          </header>
-
-          <main className='bg-[radial-gradient(circle_at_top_right,rgba(52,211,153,0.08),transparent_42%)]'>
-            <div className='space-y-6 px-4 py-6 lg:px-8'>
-              <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
-                <div>
-                  <div className='flex items-center gap-2 text-sm text-zinc-500'>
-                    <span className='font-medium text-zinc-400'>Overview</span>
-                    <span>/</span>
-                    <span>Sales performance</span>
-                  </div>
-                  <h1 className='mt-2 text-2xl font-semibold tracking-tight text-zinc-50 sm:text-3xl'>
-                    Sales Operations Dashboard
-                  </h1>
-                  <p className='mt-1 text-sm text-zinc-500'>Manage your pipeline and team performance.</p>
-                </div>
-                <div className='flex items-center gap-2'>
-                  <div className='flex h-9 items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-3 text-sm text-zinc-300'>
-                    <CalendarDays className='size-4 text-zinc-500' />
-                    Last 30 days
-                  </div>
-                  <Button className='bg-zinc-100 text-zinc-950 hover:bg-white'>
-                    Export <ArrowRight className='size-4' />
-                  </Button>
-                </div>
-              </div>
-
-              <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-4'>
-                {metrics.map((metric) => (
-                  <Card key={metric.label} className='gap-0 border-zinc-800/80 bg-zinc-900/70 py-5 ring-0'>
-                    <CardContent className='px-5'>
-                      <div className='flex items-start justify-between gap-4'>
-                        <div>
-                          <p className='text-sm text-zinc-400'>{metric.label}</p>
-                          <p className='mt-2 text-2xl font-semibold tracking-tight text-zinc-50'>{metric.value}</p>
-                          <div className='mt-2 flex items-center gap-2 text-xs text-zinc-500'>
-                            <span
-                              className={cn(
-                                'inline-flex items-center gap-1 font-medium',
-                                metric.direction === 'up' ? 'text-emerald-400' : 'text-amber-400'
-                              )}
-                            >
-                              {metric.direction === 'up' ? <ArrowUpRight className='size-3.5' /> : <ArrowDownRight className='size-3.5' />}
-                              {metric.change}
-                            </span>
-                            <span>{metric.caption}</span>
-                          </div>
-                        </div>
-                        <div className='flex size-10 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-950/70'>
-                          <metric.icon className='size-4' style={{ color: metric.color }} />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-
-              <div className='grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.75fr)]'>
-                <Card className='gap-0 border-zinc-800/80 bg-zinc-900/70 py-0 ring-0'>
-                  <CardHeader className='gap-2 border-b border-zinc-800/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between'>
-                    <div>
-                      <CardTitle className='text-base font-medium text-zinc-50'>Revenue Trend</CardTitle>
-                      <CardDescription className='text-zinc-500'>Monthly performance vs target</CardDescription>
-                    </div>
-                    <div className='flex items-center gap-4 text-xs text-zinc-500'>
-                      <span className='flex items-center gap-1.5'>
-                        <span className='size-2 rounded-full bg-zinc-400' />
-                        Revenue
-                      </span>
-                      <span className='flex items-center gap-1.5'>
-                        <span className='size-2 rounded-full bg-emerald-400' />
-                        Target
-                      </span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className='px-3 pt-4 sm:px-4'>
-                    <div className='h-[300px] w-full'>
-                      <ResponsiveContainer width='100%' height='100%'>
-                        <AreaChart data={revenueData} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
-                          <defs>
-                            <linearGradient id='revenue' x1='0' y1='0' x2='0' y2='1'>
-                              <stop offset='5%' stopColor='#34d399' stopOpacity={0.55} />
-                              <stop offset='95%' stopColor='#34d399' stopOpacity={0} />
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid vertical={false} stroke='#27272a' strokeDasharray='4 4' />
-                          <XAxis
-                            dataKey='month'
-                            tickLine={false}
-                            axisLine={false}
-                            tickMargin={12}
-                            tick={{ fill: '#71717a', fontSize: 12 }}
-                          />
-                          <YAxis
-                            tickLine={false}
-                            axisLine={false}
-                            tick={{ fill: '#71717a', fontSize: 12 }}
-                            tickFormatter={(value) => `$${value}M`}
-                          />
-                          <Tooltip
-                            cursor={{ stroke: '#3f3f46' }}
-                            wrapperStyle={{ outline: 'none' }}
-                            contentStyle={{ borderRadius: 12, border: '1px solid #3f3f46', background: '#18181b', color: '#e4e4e7' }}
-                          />
-                          <Area type='monotone' dataKey='revenue' stroke='#e4e4e7' strokeWidth={2} fill='url(#revenue)' />
-                          <Area type='monotone' dataKey='target' stroke='#34d399' strokeWidth={2} fill='transparent' strokeDasharray='5 5' />
-                        </AreaChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className='gap-0 border-zinc-800/80 bg-zinc-900/70 py-0 ring-0'>
-                  <CardHeader className='gap-2 border-b border-zinc-800/70 px-5 py-4'>
-                    <CardTitle className='text-base font-medium text-zinc-50'>Pipeline Stages</CardTitle>
-                    <CardDescription className='text-zinc-500'>Distribution by stage</CardDescription>
-                  </CardHeader>
-                  <CardContent className='px-5 pt-5'>
-                      <div className='relative mx-auto h-44 w-44'>
-                      <ResponsiveContainer width='100%' height='100%'>
-                        <PieChart>
-                          <Pie
-                            data={pipelineData}
-                            dataKey='count'
-                            nameKey='name'
-                            cx='50%'
-                            cy='50%'
-                            innerRadius={58}
-                            outerRadius={76}
-                            paddingAngle={3}
-                            stroke='none'
-                          >
-                            {pipelineData.map((entry) => (
-                              <Cell key={entry.name} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <Tooltip
-                            wrapperStyle={{ outline: 'none' }}
-                            contentStyle={{ borderRadius: 12, border: '1px solid #3f3f46', background: '#18181b', color: '#e4e4e7' }}
-                          />
-                        </PieChart>
-                      </ResponsiveContainer>
-                      <div className='pointer-events-none absolute inset-0 flex flex-col items-center justify-center'>
-                        <span className='text-xs text-zinc-500'>Total pipeline</span>
-                        <span className='text-lg font-semibold text-zinc-50'>$4.8M</span>
-                      </div>
-                    </div>
-                    <div className='mt-5 space-y-3'>
-                      {pipelineData.map((item) => (
-                        <div key={item.name} className='flex items-center justify-between text-sm'>
-                          <span className='flex items-center gap-2 text-zinc-400'>
-                            <span className='size-2 rounded-full' style={{ backgroundColor: item.color }} />
-                            {item.name}
-                          </span>
-                          <span className='text-zinc-500'>{item.count}</span>
-                          <span className='font-medium text-zinc-200'>{item.percent}%</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className='grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.75fr)]'>
-                <Card className='gap-0 border-zinc-800/80 bg-zinc-900/70 py-0 ring-0'>
-                  <CardHeader className='gap-2 border-b border-zinc-800/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between'>
-                    <div>
-                      <CardTitle className='text-base font-medium text-zinc-50'>Recent Deals</CardTitle>
-                      <CardDescription className='text-zinc-500'>Latest activity across your pipeline</CardDescription>
-                    </div>
-                    <Button variant='ghost' size='sm' className='text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'>
-                      View all <ArrowRight className='size-3.5' />
-                    </Button>
-                  </CardHeader>
-                  <CardContent className='px-0'>
-                    <Table>
-                      <TableHeader>
-                        <TableRow className='border-zinc-800/70 hover:bg-transparent'>
-                          <TableHead className='px-5 text-xs font-medium text-zinc-500'>Deal</TableHead>
-                          <TableHead className='px-5 text-xs font-medium text-zinc-500'>Contact</TableHead>
-                          <TableHead className='px-5 text-xs font-medium text-zinc-500'>Amount</TableHead>
-                          <TableHead className='px-5 text-xs font-medium text-zinc-500'>Status</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {recentDeals.map((deal) => (
-                          <TableRow key={deal.company} className='border-zinc-800/60 hover:bg-zinc-800/30'>
-                            <TableCell className='px-5 py-4'>
-                              <span className='font-medium text-zinc-200'>{deal.company}</span>
-                            </TableCell>
-                            <TableCell className='px-5 py-4'>
-                              <span className='block text-sm text-zinc-300'>{deal.contact}</span>
-                              <span className='block text-xs text-zinc-600'>{deal.time}</span>
-                            </TableCell>
-                            <TableCell className='px-5 py-4 font-medium text-zinc-200'>{deal.amount}</TableCell>
-                            <TableCell className='px-5 py-4'>
-                              <Badge
-                                variant='outline'
-                                className={cn(
-                                  'rounded-full bg-transparent',
-                                  deal.status === 'Won'
-                                    ? 'border-emerald-400/30 text-emerald-300'
-                                    : 'border-zinc-700 text-zinc-400'
-                                )}
-                              >
-                                {deal.status}
-                              </Badge>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
-
-                <Card className='gap-0 border-zinc-800/80 bg-zinc-900/70 py-0 ring-0'>
-                  <CardHeader className='gap-2 border-b border-zinc-800/70 px-5 py-4'>
-                    <CardTitle className='text-base font-medium text-zinc-50'>Top Performers</CardTitle>
-                    <CardDescription className='text-zinc-500'>This month's leaders</CardDescription>
-                  </CardHeader>
-                  <CardContent className='space-y-4 px-5 py-5'>
-                    {topPerformers.map((person) => (
-                      <div key={person.name} className='flex items-start gap-3'>
-                        <div className='relative'>
-                          <Avatar className='size-10'>
-                            <AvatarFallback className='bg-zinc-800 font-medium text-zinc-200'>{person.initials}</AvatarFallback>
-                          </Avatar>
-                          <span className='absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-zinc-950 text-[10px] font-semibold text-zinc-400 ring-1 ring-zinc-700'>
-                            {person.rank}
-                          </span>
-                        </div>
-                        <div className='min-w-0 flex-1'>
-                          <div className='flex items-center justify-between gap-2'>
-                            <span className='truncate text-sm font-medium text-zinc-200'>{person.name}</span>
-                            <span className='text-sm font-semibold text-zinc-50'>{person.revenue}</span>
-                          </div>
-                          <div className='mt-0.5 flex items-center justify-between gap-2 text-xs text-zinc-500'>
-                            <span>{person.deals}</span>
-                            <span className='font-medium text-emerald-400'>{person.change}</span>
-                          </div>
-                        </div>
-                      </div>
+        <Card className='gap-0 border-zinc-800/80 bg-zinc-900/70 py-0 ring-0'>
+          <CardHeader className='gap-2 border-b border-zinc-800/70 px-5 py-4'>
+            <CardTitle className='text-base font-medium text-zinc-50'>Pipeline Stages</CardTitle>
+            <CardDescription className='text-zinc-500'>Distribution by stage</CardDescription>
+          </CardHeader>
+          <CardContent className='px-5 pt-5'>
+            <div className='relative mx-auto h-44 w-44'>
+              <ResponsiveContainer width='100%' height='100%'>
+                <PieChart>
+                  <Pie
+                    data={pipelineData}
+                    dataKey='count'
+                    nameKey='name'
+                    cx='50%'
+                    cy='50%'
+                    innerRadius={58}
+                    outerRadius={76}
+                    paddingAngle={3}
+                    stroke='none'
+                  >
+                    {pipelineData.map((entry) => (
+                      <Cell key={entry.name} fill={entry.color} />
                     ))}
-                  </CardContent>
-                </Card>
+                  </Pie>
+                  <Tooltip
+                    wrapperStyle={{ outline: 'none' }}
+                    contentStyle={{ borderRadius: 12, border: '1px solid #3f3f46', background: '#18181b', color: '#e4e4e7' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className='pointer-events-none absolute inset-0 flex flex-col items-center justify-center'>
+                <span className='text-xs text-zinc-500'>Total pipeline</span>
+                <span className='text-lg font-semibold text-zinc-50'>$4.8M</span>
               </div>
             </div>
-          </main>
-        </div>
+            <div className='mt-5 space-y-3'>
+              {pipelineData.map((item) => (
+                <div key={item.name} className='flex items-center justify-between text-sm'>
+                  <span className='flex items-center gap-2 text-zinc-400'>
+                    <span className='size-2 rounded-full' style={{ backgroundColor: item.color }} />
+                    {item.name}
+                  </span>
+                  <span className='text-zinc-500'>{item.count}</span>
+                  <span className='font-medium text-zinc-200'>{item.percent}%</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+
+      <div className='grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.75fr)]'>
+        <Card className='gap-0 border-zinc-800/80 bg-zinc-900/70 py-0 ring-0'>
+          <CardHeader className='gap-2 border-b border-zinc-800/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between'>
+            <div>
+              <CardTitle className='text-base font-medium text-zinc-50'>Recent Deals</CardTitle>
+              <CardDescription className='text-zinc-500'>Latest activity across your pipeline</CardDescription>
+            </div>
+            <Button variant='ghost' size='sm' asChild className='text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'>
+              <Link to='/deals'>View all <ArrowRight className='size-3.5' /></Link>
+            </Button>
+          </CardHeader>
+          <CardContent className='px-0'>
+            <Table>
+              <TableHeader>
+                <TableRow className='border-zinc-800/70 hover:bg-transparent'>
+                  <TableHead className='px-5 text-xs font-medium text-zinc-500'>Deal</TableHead>
+                  <TableHead className='px-5 text-xs font-medium text-zinc-500'>Contact</TableHead>
+                  <TableHead className='px-5 text-xs font-medium text-zinc-500'>Amount</TableHead>
+                  <TableHead className='px-5 text-xs font-medium text-zinc-500'>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {recentDeals.map((deal) => (
+                  <TableRow key={deal.company} className='border-zinc-800/60 hover:bg-zinc-800/30'>
+                    <TableCell className='px-5 py-4'>
+                      <span className='font-medium text-zinc-200'>{deal.company}</span>
+                    </TableCell>
+                    <TableCell className='px-5 py-4'>
+                      <span className='block text-sm text-zinc-300'>{deal.contact}</span>
+                      <span className='block text-xs text-zinc-600'>{deal.time}</span>
+                    </TableCell>
+                    <TableCell className='px-5 py-4 font-medium text-zinc-200'>{deal.amount}</TableCell>
+                    <TableCell className='px-5 py-4'>
+                      <Badge
+                        variant='outline'
+                        className={cn(
+                          'rounded-full bg-transparent',
+                          deal.status === 'Won'
+                            ? 'border-emerald-400/30 text-emerald-300'
+                            : 'border-zinc-700 text-zinc-400'
+                        )}
+                      >
+                        {deal.status}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        <Card className='gap-0 border-zinc-800/80 bg-zinc-900/70 py-0 ring-0'>
+          <CardHeader className='gap-2 border-b border-zinc-800/70 px-5 py-4'>
+            <CardTitle className='text-base font-medium text-zinc-50'>Top Performers</CardTitle>
+            <CardDescription className='text-zinc-500'>This month's leaders</CardDescription>
+          </CardHeader>
+          <CardContent className='space-y-4 px-5 py-5'>
+            {topPerformers.map((person) => (
+              <div key={person.name} className='flex items-start gap-3'>
+                <div className='relative'>
+                  <Avatar className='size-10'>
+                    <AvatarFallback className='bg-zinc-800 font-medium text-zinc-200'>{person.initials}</AvatarFallback>
+                  </Avatar>
+                  <span className='absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-zinc-950 text-[10px] font-semibold text-zinc-400 ring-1 ring-zinc-700'>
+                    {person.rank}
+                  </span>
+                </div>
+                <div className='min-w-0 flex-1'>
+                  <div className='flex items-center justify-between gap-2'>
+                    <span className='truncate text-sm font-medium text-zinc-200'>{person.name}</span>
+                    <span className='text-sm font-semibold text-zinc-50'>{person.revenue}</span>
+                  </div>
+                  <div className='mt-0.5 flex items-center justify-between gap-2 text-xs text-zinc-500'>
+                    <span>{person.deals}</span>
+                    <span className='font-medium text-emerald-400'>{person.change}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+    </SalesShell>
   );
 }
